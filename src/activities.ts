@@ -1,8 +1,14 @@
 import { Chance } from "chance";
 import type { Customer } from "./customer";
 import { supportEngineers, type Ticket } from "./ticket";
+import { connectToDatabase } from "./services/utilities/src/mongodbConnect";
 
 const chance = new Chance();
+const mClient = connectToDatabase();
+
+export async function createTicket(ticket: Ticket): Promise<Ticket> {
+
+}
 
 export async function assignTicketToEngineer(ticket: Ticket): Promise<Ticket> {
   const assignedTo = chance.pickone(supportEngineers);

@@ -29,6 +29,8 @@ export async function ticketLifecycleWorkflow(_ticket: Ticket) {
   let newTicketStatus: TicketStatusChangeType = resetTicketStatusChange();
   wf.setHandler(ticketStatusChanged, (tc: TicketStatusChange) => void (newTicketStatus = {...tc}));
 
+  await acts.createTicket(ticket.value);
+
   while (ticket.value.status != "closed") {
     console.log("Ticket Status: ", ticket.value.status);
 

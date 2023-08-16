@@ -26,6 +26,7 @@
     "@temporalio/worker": "1.7.0",
     "@temporalio/workflow": "1.7.0",
     "chance": "^1.1.11",
+    "mongodb": "^5.7.0",
     "nanoid": "3.x"
   },
   "devDependencies": {
