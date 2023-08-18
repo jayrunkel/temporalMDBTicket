@@ -1,22 +1,68 @@
 import { Chance } from "chance";
 import type { Customer } from "./customer";
-import { supportEngineers, type Ticket } from "./ticket";
+import { supportEngineers, TicketDescription, type Ticket } from "./ticket";
 import { connectToDatabase } from "./services/utilities/src/mongodbConnect";
+import { createTicket } from "./services/ticket/src/ticketService";
+import { MongoClient } from "mongodb";
+import { assertIsDefined } from "./services/utilities/src/utlities";
+
 
 const chance = new Chance();
-const mClient = connectToDatabase();
+let mClient : MongoClient | undefined = undefined;
 
-export async function createTicket(ticket: Ticket): Promise<Ticket> {
+async function setUpDBConnection () : Promise<MongoClient> {
+  const client = await connectToDatabase();
+  assertMClient(client);
+  return client;
+}
 
+export async function getDBClient () : Promise<MongoClient> {
+  if (mClient === undefined) {
+    mClient = await setUpDBConnection()
+  }
+  return mClient;
+}
+
+function assertMClient(dbClient: MongoClient | undefined) : asserts dbClient is MongoClient {
+  if (dbClient === undefined) {
+    throw new Error ("Database connection not available");
+  }
+}
+
+
+
+export async function createDBTicket(ticketDesc: TicketDescription): Promise<Ticket> {
+  const client = await getDBClient();
+
+  const newTicket: Ticket = {
+    ticketNumber: 0,
+    customerId: ticketDesc.customerId,
+    responseMinSLA: 30, //need to get from user doc
+    priority: ticketDesc.priority,
+    status: "unassigned",
+    assignedTo: null
+  };
+  
+  const newTicketNum = await createTicket(client, ticketDesc.customerId, ticketDesc.title, ticketDesc.description, ticketDesc.priority);
+  assertIsDefined(newTicketNum);
+
+  newTicket.ticketNumber = newTicketNum;
+  return newTicket;
 }
 
 export async function assignTicketToEngineer(ticket: Ticket): Promise<Ticket> {
-  const assignedTo = chance.pickone(supportEngineers);
-  const status = "inProgress";
-  const msg = `[${ticket.ticketNumber}] Assigned ticket to engineer: ${assignedTo}.`;
-
-  console.log(msg);
-  return {...ticket, assignedTo, status};
+  try {
+    const assignedTo = chance.pickone(supportEngineers);
+    assertIsDefined(assignedTo);
+    const status = "inProgress";
+    const msg = `[${ticket.ticketNumber}] Assigned ticket to engineer: ${assignedTo}.`;
+    console.log(msg);
+    return {...ticket, assignedTo, status}
+  }
+  catch (err) {
+    console.log(err);
+    return ticket;
+  }
 }
 
 export async function sendTicketAssignmentNoficiationEmail(ticket: Ticket): Promise<string> {

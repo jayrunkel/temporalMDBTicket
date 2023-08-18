@@ -101,6 +101,7 @@ export interface TicketDocument extends WithId<Document> {
 		ticketNumber: number,
 		ticketOwner: number,
 		subject: string,
+		priority: string,
 		version: number,
 		status: ticketStatusTypes,
 		comments: Comment[];
@@ -123,7 +124,7 @@ async function getNextTicketNum(client: MongoClient) : Promise<number> {
 }
 
 // This implementation assumes that there is an unique index on ticketNumber
-async function createUniqueTicket(client: MongoClient, owner: number , subject: string, description: string, tryNumber: number, error: any) : Promise<number> {
+async function createUniqueTicket(client: MongoClient, owner: number , subject: string, description: string, priority: string, tryNumber: number, error: any) : Promise<number> {
 	if (tryNumber > 5) {
 		throw error
 
@@ -137,6 +138,7 @@ async function createUniqueTicket(client: MongoClient, owner: number , subject: 
 				ticketNumber: newTicketNum,
 				ticketOwner: owner,
 				subject,
+				priority,
 				version: currentVersion,
 				status: "unassigned",
 				comments: [{
@@ -149,16 +151,16 @@ async function createUniqueTicket(client: MongoClient, owner: number , subject: 
 			console.log(res)
 			return newTicketNum
 		} catch (err) {
-			return await createUniqueTicket(client, owner, subject, description, ++tryNumber, err)
+			return await createUniqueTicket(client, owner, subject, description, priority, ++tryNumber, err)
 		}
 	}
 	
 }
 
-export  async function createTicket (client: MongoClient, owner:number, subject:string, description:string)  {
+export  async function createTicket (client: MongoClient, owner:number, subject:string, description:string, priority: string)  {
     
     try {
-        const newTicketNum = await createUniqueTicket(client, owner, subject, description, 1, null);
+        const newTicketNum = await createUniqueTicket(client, owner, subject, description, priority, 1, null);
         return newTicketNum;
     } catch (err) {
         console.log();

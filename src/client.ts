@@ -1,18 +1,15 @@
 import { Connection, Client } from '@temporalio/client';
 import { ticketLifecycleWorkflow } from './workflows';
-import { Ticket } from './ticket';
+import { Ticket, TicketDescription } from './ticket';
 
 //import type { Customer } from './customer';
 //import { nanoid } from 'nanoid';
 
-const jayTicket: Ticket =  {
-  ticketNumber: 123,
-  customerId: 456,
-  responseMinSLA: 30, //response time in min SLA
-  priority: "S3",
-  status: "unassigned",
-  assignedTo: null,
-
+const jayTicket: TicketDescription =  {
+  customerId: 1,
+  title: "This is my first ticket",
+  description: "Wow, I really made a mess of things!",
+  priority: "S3"
 }
 
 async function run() {
@@ -34,7 +31,7 @@ async function run() {
     args: [ jayTicket ],
     taskQueue: 'ticketHandling',
     // in practice, use a meaningful business ID, like customerId or transactionId
-    workflowId: 'ticketWorkflow_' + jayTicket.ticketNumber,  //'workflowId-' + nanoid(),
+    workflowId: 'ticketWorkflow_' + jayTicket.customerId,  //'workflowId-' + nanoid(),
   });
   console.log(`Started workflow ${handle.workflowId}`);
 

@@ -5,6 +5,13 @@ export type supportEngineersType = "John" | "Mary" | "Ade" | "Mike" | "Steve"
 export const supportEngineers : supportEngineersType[] = ["John",  "Mary", "Ade", "Mike", "Steve"];
 
 
+export interface TicketDescription {
+  customerId: number,
+  priority: priorityTypes,
+  title: string,
+  description: string
+};
+
 export interface Ticket {
     ticketNumber: number,
     customerId: number,

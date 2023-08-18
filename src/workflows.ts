@@ -2,7 +2,7 @@
 import * as wf from '@temporalio/workflow';
 import type * as activities from './activities';
 import type { Customer } from "./customer";
-import type { Ticket, ticketStatusTypes } from "./ticket"
+import type { Ticket, TicketDescription, ticketStatusTypes } from "./ticket"
 
 const acts = wf.proxyActivities<
   typeof activities
@@ -24,12 +24,13 @@ type TicketStatusChangeType = TicketStatusChange;
 export const ticketStatusChanged = wf.defineSignal<[TicketStatusChange]>('ticketStatusChanged');
 
 // assume Atlas trigger kicks off workflow as soon as it is created
-export async function ticketLifecycleWorkflow(_ticket: Ticket) {
-  const ticket = useState('ticket', _ticket);
+export async function ticketLifecycleWorkflow(ticketDescription: TicketDescription) {
+  
   let newTicketStatus: TicketStatusChangeType = resetTicketStatusChange();
   wf.setHandler(ticketStatusChanged, (tc: TicketStatusChange) => void (newTicketStatus = {...tc}));
 
-  await acts.createTicket(ticket.value);
+  const _ticket = await acts.createDBTicket(ticketDescription);
+  const ticket = useState('ticket', _ticket);
 
   while (ticket.value.status != "closed") {
     console.log("Ticket Status: ", ticket.value.status);

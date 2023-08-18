@@ -1,9 +1,10 @@
 import { MongoClient } from "mongodb";
 
-export const dbName = "techSupport"
-export const ticketCollectionName = "ticket"
-export const usersCollectionName = "users"
-const uri = "http://localhost:27017"
+export const dbName = "techSupport";
+export const ticketCollectionName = "ticket";
+export const usersCollectionName = "users";
+export const engineerCollectionName = "supportEngineers";
+const uri = "mongodb://localhost:27017";
 
 
 export async function connectToDatabase (): Promise<MongoClient | undefined> {
